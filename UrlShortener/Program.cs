@@ -32,7 +32,7 @@ namespace UrlShortener
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Url}/{action=GetList}/{id?}");
+                pattern: "{controller=Url}/{action=List}/{id?}");
 
             app.Run();
         }
