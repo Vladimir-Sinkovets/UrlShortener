@@ -11,7 +11,7 @@ using UrlShortener.DataBase;
 namespace UrlShortener.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240412154848_AddUrlMappingEntries")]
+    [Migration("20240412182235_AddUrlMappingEntries")]
     partial class AddUrlMappingEntries
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,19 +23,14 @@ namespace UrlShortener.Migrations
 
             modelBuilder.Entity("UrlShortener.Models.UrlMappingEntry", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
 
-                    b.Property<int>("Count")
+                    b.Property<int>("ClicksCount")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<string>("ShortUrl")
-                        .IsRequired()
-                        .HasColumnType("longtext");
 
                     b.Property<string>("Url")
                         .IsRequired()

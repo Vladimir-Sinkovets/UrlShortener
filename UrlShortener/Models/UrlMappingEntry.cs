@@ -2,10 +2,9 @@
 {
     public class UrlMappingEntry
     {
-        public int Id { get; set; }
+        public string Id { get; set; } = string.Empty;
         public string Url { get; set; } = string.Empty;
-        public string ShortUrl { get; set; } = string.Empty;
         public DateTime Created { get; set; }
-        public int Count {  get; set; }
+        public int ClicksCount {  get; set; }
     }
 }
