@@ -10,11 +10,23 @@
     @foreach (var item in Model.UrlMappingEntries)
     {
         <tr>
-            <td>@item.Url</td>
-            <td>@($"https://{Model.Host}/{item.Id}")</td>
-            <td>@item.Created</td>
             <td>
-                <a class="btn btn-danger">Delete</a>
+                <a href="@item.Url" target="_blank">
+                    @item.Url
+                </a>
+            </td>
+            <td>
+                <a href="@($"https://{Model.Host}/{item.Id}")" target="_blank">
+                    @($"https://{Model.Host}/{item.Id}")
+                </a>
+            </td>
+            <td>
+                @item.Created
+            </td>
+            <td>
+                <a class="btn btn-danger">
+                    Delete
+                </a>
             </td>
         </tr>
     }
