@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using System;
 using UrlShortener.DataBase;
 using UrlShortener.Services.ShortUrlManager;
 using UrlShortener.Services.UniqueStringGenerator;
@@ -9,6 +8,7 @@ namespace UrlShortener
     public class Program
     {
         private const string MySqlConnectionSection = "MySql";
+        private const string UniqueStringGeneratorSection = "UniqueStringGenerator";
 
         public static void Main(string[] args)
         {
@@ -25,7 +25,7 @@ namespace UrlShortener
 
             builder.Services.AddTransient<IShortUrlManager, ShortUrlManager>();
             builder.Services.AddTransient<IUniqueStringGenerator, UniqueStringGenerator>();
-            builder.Services.Configure<UniqueStringGeneratorSettings>(builder.Configuration.GetSection("UniqueStringGenerator"));
+            builder.Services.Configure<UniqueStringGeneratorSettings>(builder.Configuration.GetSection(UniqueStringGeneratorSection));
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
