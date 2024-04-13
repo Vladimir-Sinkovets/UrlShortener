@@ -1,17 +1,25 @@
-﻿namespace UrlShortener.Services.UniqueStringGenerator
+﻿using Microsoft.Extensions.Options;
+
+namespace UrlShortener.Services.UniqueStringGenerator
 {
     public class UniqueStringGenerator : IUniqueStringGenerator
     {
-        private static readonly string str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
+        private readonly string _allowedChars;
 
-        private const int Length = 12;
+        private readonly int _length;
+
+        public UniqueStringGenerator(IOptions<UniqueStringGeneratorSettings> options)
+        {
+            _allowedChars = options.Value.AllowedChars;
+            _length = options.Value.Length;
+        }
 
         public string Generate()
         {
             return Guid.NewGuid()
                 .ToByteArray()
-                .Take(Length)
-                .Select(b => str[b % str.Length].ToString())
+                .Take(_length)
+                .Select(b => _allowedChars[b % _allowedChars.Length].ToString())
                 .Aggregate((x, y) => x + y);
         }
     }
