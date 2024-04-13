@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using UrlShortener.DataBase;
+using UrlShortener.Services.ShortUrlManager;
 using UrlShortener.Services.UniqueStringGenerator;
 
 namespace UrlShortener
@@ -22,6 +23,7 @@ namespace UrlShortener
                 options.UseMySql(connection, version);
             });
 
+            builder.Services.AddTransient<IShortUrlManager, ShortUrlManager>();
             builder.Services.AddTransient<IUniqueStringGenerator, UniqueStringGenerator>();
             builder.Services.Configure<UniqueStringGeneratorSettings>(builder.Configuration.GetSection("UniqueStringGenerator"));
             builder.Services.AddControllersWithViews();

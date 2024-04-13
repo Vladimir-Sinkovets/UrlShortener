@@ -1,20 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using UrlShortener.DataBase;
-using UrlShortener.Models;
-using UrlShortener.Services.UniqueStringGenerator;
+using UrlShortener.Services.Exceptions;
+using UrlShortener.Services.ShortUrlManager;
 using UrlShortener.ViewModels;
 
 namespace UrlShortener.Controllers
 {
     public class UrlController : Controller
     {
-        private readonly IDbContext _dbContext;
-        private readonly IUniqueStringGenerator _uniqueStringGenerator;
+        private readonly IShortUrlManager _shortUrlManager;
 
-        public UrlController(IDbContext dbContext, IUniqueStringGenerator uniqueStringGenerator)
+        public UrlController(IShortUrlManager shortUrlManager)
         {
-            _dbContext = dbContext;
-            _uniqueStringGenerator = uniqueStringGenerator;
+            _shortUrlManager = shortUrlManager;
         }
 
         private string Host { get => HttpContext.Request.Host.Value; }
@@ -22,7 +19,7 @@ namespace UrlShortener.Controllers
         [HttpGet]
         public IActionResult List()
         {
-            var urlMappingEntries = _dbContext.UrlMappingEntries.ToList();
+            var urlMappingEntries = _shortUrlManager.GetAllUrlMappingEntries();
 
             var viewModel = new ListViewModel()
             {
@@ -39,59 +36,30 @@ namespace UrlShortener.Controllers
         [HttpPost]
         public async Task<IActionResult> Shorten(ShortenViewModel viewModel)
         {
-            if (Uri.IsWellFormedUriString(viewModel.Url, UriKind.Absolute) == false)
+            try
             {
-                viewModel.IsCorrect = false;
+                var entry = await _shortUrlManager.AddUrlMappingEntryAsync(viewModel.Url);
+
+                viewModel.ShortUrl = $"https://{Host}/{entry.Id}";
+
                 return View(viewModel);
             }
-
-            var uniqueString = GenerateUniqueStringForCollection(_uniqueStringGenerator, _dbContext.UrlMappingEntries);
-
-            var urlMappingEntry = new UrlMappingEntry()
+            catch (ArgumentException)
             {
-                ClicksCount = 0,
-                Created = DateTime.Now,
-                Url = viewModel.Url,
-                Id = uniqueString,
-            };
+                viewModel.IsCorrect = false;
 
-            _dbContext.UrlMappingEntries.Add(urlMappingEntry);
-
-            await _dbContext.SaveChangesAsync();
-
-            viewModel.ShortUrl = $"https://{Host}/{uniqueString}";
-
-            return View(viewModel);
-        }
-
-        private static string GenerateUniqueStringForCollection(IUniqueStringGenerator uniqueStringGenerator,
-            IQueryable<UrlMappingEntry> urlMappingEntries)
-        {
-            var uniqueString = string.Empty;
-
-            UrlMappingEntry? entry = null;
-            
-            do
-            {
-                uniqueString = uniqueStringGenerator.Generate();
-                entry = urlMappingEntries.FirstOrDefault(x => x.Id == uniqueString);
+                return View(viewModel);
             }
-            while (entry != null);
-
-            return uniqueString;
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> DeleteShortUrl(string id, string redirectUrl)
         {
-            var entry = _dbContext.UrlMappingEntries.FirstOrDefault(x => x.Id == id);
-
-            if (entry != null)
-            {
-                _dbContext.UrlMappingEntries.Remove(entry);
-
-                await _dbContext.SaveChangesAsync();
-            }
+            await _shortUrlManager.DeleteUrlMappingEntryAsync(id);
 
             return Redirect(redirectUrl);
         }
@@ -100,18 +68,20 @@ namespace UrlShortener.Controllers
         [Route("/{id}")]
         public async Task<IActionResult> UseShortUrlAsync(string id)
         {
-            var entry = _dbContext.UrlMappingEntries.FirstOrDefault(x => x.Id == id);
+            try
+            {
+                var entry = await _shortUrlManager.GetAndCountUrlMappingEntryAsync(id);
 
-            if (entry == null)
+                return Redirect(entry.Url);
+            }
+            catch (NotFoundException)
             {
                 return NotFound();
             }
-
-            entry.ClicksCount++;
-
-            await _dbContext.SaveChangesAsync();
-
-            return Redirect(entry.Url);
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }
