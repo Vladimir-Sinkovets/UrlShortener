@@ -30,6 +30,11 @@ namespace UrlShortener
 
             var app = builder.Build();
 
+            using var scope = app.Services.CreateScope();
+            scope.ServiceProvider
+                .GetRequiredService<ApplicationDbContext>()
+                .Database
+                .Migrate();
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
