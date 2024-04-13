@@ -17,28 +17,24 @@ namespace UrlShortener.Controllers
             _uniqueStringGenerator = uniqueStringGenerator;
         }
 
+        private string Host { get => HttpContext.Request.Host.Value; }
+
         [HttpGet]
         public IActionResult List()
         {
-            string host = HttpContext.Request.Host.Value;
-
-            var urlMappingEntries = _dbContext.UrlMappingEntries
-                .ToList();
+            var urlMappingEntries = _dbContext.UrlMappingEntries.ToList();
 
             var viewModel = new ListViewModel()
             {
                 UrlMappingEntries = urlMappingEntries,
-                Host = host
+                Host = Host,
             };
 
             return View(viewModel);
         }
 
         [HttpGet]
-        public IActionResult Shorten()
-        {
-            return View();
-        }
+        public IActionResult Shorten() => View();
 
         [HttpPost]
         public async Task<IActionResult> Shorten(ShortenViewModel viewModel)
@@ -49,7 +45,7 @@ namespace UrlShortener.Controllers
                 return View(viewModel);
             }
 
-            string uniqueString = GetUniqueStringForDatabase();
+            var uniqueString = GenerateUniqueStringForCollection(_uniqueStringGenerator, _dbContext.UrlMappingEntries);
 
             var urlMappingEntry = new UrlMappingEntry()
             {
@@ -63,15 +59,13 @@ namespace UrlShortener.Controllers
 
             await _dbContext.SaveChangesAsync();
 
-            string host = HttpContext.Request.Host.Value;
-
-            viewModel.ShortUrl = $"https://{host}/{uniqueString}";
-            viewModel.IsCorrect = true;
+            viewModel.ShortUrl = $"https://{Host}/{uniqueString}";
 
             return View(viewModel);
         }
 
-        private string GetUniqueStringForDatabase()
+        private static string GenerateUniqueStringForCollection(IUniqueStringGenerator uniqueStringGenerator,
+            IQueryable<UrlMappingEntry> urlMappingEntries)
         {
             var uniqueString = string.Empty;
 
@@ -79,8 +73,8 @@ namespace UrlShortener.Controllers
             
             do
             {
-                uniqueString = _uniqueStringGenerator.Generate();
-                entry = _dbContext.UrlMappingEntries.FirstOrDefault(x => x.Id == uniqueString);
+                uniqueString = uniqueStringGenerator.Generate();
+                entry = urlMappingEntries.FirstOrDefault(x => x.Id == uniqueString);
             }
             while (entry != null);
 
