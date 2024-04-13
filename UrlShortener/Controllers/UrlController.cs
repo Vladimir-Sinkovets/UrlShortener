@@ -8,8 +8,8 @@ namespace UrlShortener.Controllers
 {
     public class UrlController : Controller
     {
-        private IDbContext _dbContext;
-        private IUniqueStringGenerator _uniqueStringGenerator;
+        private readonly IDbContext _dbContext;
+        private readonly IUniqueStringGenerator _uniqueStringGenerator;
 
         public UrlController(IDbContext dbContext, IUniqueStringGenerator uniqueStringGenerator)
         {
