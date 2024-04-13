@@ -87,9 +87,18 @@ namespace UrlShortener.Controllers
             return uniqueString;
         }
 
-        [HttpDelete]
-        public IActionResult DeleteShortUrl(string redirectUrl)
+        [HttpPost]
+        public async Task<IActionResult> DeleteShortUrl(string id, string redirectUrl)
         {
+            var entry = _dbContext.UrlMappingEntries.FirstOrDefault(x => x.Id == id);
+
+            if (entry != null)
+            {
+                _dbContext.UrlMappingEntries.Remove(entry);
+
+                await _dbContext.SaveChangesAsync();
+            }
+
             return Redirect(redirectUrl);
         }
         
