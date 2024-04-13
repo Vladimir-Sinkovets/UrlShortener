@@ -1,0 +1,41 @@
+﻿@model ListViewModel
+
+<table class="table">
+    <tr>
+        <th>Url</th>
+        <th>ShortUrl</th>
+        <th>Date</th>
+        <th>ClicksCount</th>
+        <th></th>
+    </tr>
+    @foreach (var item in Model.UrlMappingEntries!)
+    {
+        <tr>
+            <td>
+                <a href="@item.Url" target="_blank">
+                    @item.Url
+                </a>
+            </td>
+            <td>
+                <a href="@($"https://{Model.Host}/{item.Id}")" target="_blank">
+                    @($"https://{Model.Host}/{item.Id}")
+                </a>
+            </td>
+            <td>
+                @item.Created.ToString("dd.MM.yyyy")
+            </td>
+            <td>
+                @item.ClicksCount
+            </td>
+            <td>
+                <form method="post" asp-controller="Url" asp-action="DeleteShortUrl">
+                    <input hidden name="id" value="@item.Id" />
+                    <input hidden name="redirectUrl" value="@($"https://{Model.Host}/Url/List")"/>
+
+                    <input class="btn btn-danger" type="submit" value="Delete"/>
+                </form>
+
+            </td>
+        </tr>
+    }
+</table>

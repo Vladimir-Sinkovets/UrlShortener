@@ -1,34 +1,49 @@
+using Microsoft.EntityFrameworkCore;
+using UrlShortener.DataBase;
+using UrlShortener.Services.ShortUrlManager;
+using UrlShortener.Services.UniqueStringGenerator;
+
 namespace UrlShortener
 {
     public class Program
     {
+        private const string MySqlConnectionSection = "MySql";
+        private const string UniqueStringGeneratorSection = "UniqueStringGenerator";
+
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            var connection = builder.Configuration.GetConnectionString(MySqlConnectionSection);
+            
+            ServerVersion version = ServerVersion.AutoDetect(connection);
+
+            builder.Services.AddDbContext<IDbContext, ApplicationDbContext>(options =>
+            {
+                options.UseMySql(connection, version);
+            });
+
+            builder.Services.AddTransient<IShortUrlManager, ShortUrlManager>();
+            builder.Services.AddTransient<IUniqueStringGenerator, UniqueStringGenerator>();
+            builder.Services.Configure<UniqueStringGeneratorSettings>(builder.Configuration.GetSection(UniqueStringGeneratorSection));
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
-            {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
+            using var scope = app.Services.CreateScope();
+            scope.ServiceProvider
+                .GetRequiredService<ApplicationDbContext>()
+                .Database
+                .Migrate();
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();
 
-            app.UseAuthorization();
-
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{controller=Url}/{action=List}/{id?}");
 
             app.Run();
         }
