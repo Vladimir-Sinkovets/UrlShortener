@@ -3,7 +3,7 @@
 @if (Model != null && Model.ShortUrl != string.Empty)
 {
     <div>
-        Your short URL: <a href="@Model?.ShortUrl">@Model?.ShortUrl</a>
+        Your short URL: <a target="_blank" href="@Model?.ShortUrl">@Model?.ShortUrl</a>
     </div>
 }
 <form method="post" asp-controller="url" asp-action="shorten">
