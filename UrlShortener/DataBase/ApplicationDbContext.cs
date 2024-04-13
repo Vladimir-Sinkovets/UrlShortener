@@ -12,5 +12,15 @@ namespace UrlShortener.DataBase
         {
             
         }
+
+        void IDbContext.SaveChanges()
+        {
+            base.SaveChanges();
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await base.SaveChangesAsync();
+        }
     }
 }

@@ -1,0 +1,18 @@
+﻿@model ShortenViewModel
+
+@if (Model?.ShortUrl != string.Empty)
+{
+    <div>
+        <a href="@Model?.ShortUrl">@Model?.ShortUrl</a>
+    </div>
+}
+<form method="post" asp-controller="url" asp-action="shorten">
+    @if (Model?.IsCorrect == false)
+    {
+        <div>
+            @: Wrong format
+        </div>
+    }
+    <input asp-for="Url" type="text" />
+    <input class="btn btn-primary" type="submit" value="Shorten Url"/>
+</form>

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using UrlShortener.DataBase;
+using UrlShortener.Services.UniqueStringGenerator;
 
 namespace UrlShortener
 {
@@ -20,6 +21,7 @@ namespace UrlShortener
                 options.UseMySql(connection, version);
             });
 
+            builder.Services.AddTransient<IUniqueStringGenerator, UniqueStringGenerator>();
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
