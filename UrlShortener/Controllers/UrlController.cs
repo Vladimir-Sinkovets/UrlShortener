@@ -104,9 +104,20 @@ namespace UrlShortener.Controllers
         
         [HttpGet]
         [Route("/{id}")]
-        public IActionResult UseShortUrl(string id)
+        public async Task<IActionResult> UseShortUrlAsync(string id)
         {
-            return Content("Ok");
+            var entry = _dbContext.UrlMappingEntries.FirstOrDefault(x => x.Id == id);
+
+            if (entry == null)
+            {
+                return NotFound();
+            }
+
+            entry.ClicksCount++;
+
+            await _dbContext.SaveChangesAsync();
+
+            return Redirect(entry.Url);
         }
     }
 }

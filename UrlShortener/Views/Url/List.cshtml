@@ -5,6 +5,7 @@
         <th>Url</th>
         <th>ShortUrl</th>
         <th>Date</th>
+        <th>ClicksCount</th>
         <th></th>
     </tr>
     @foreach (var item in Model.UrlMappingEntries)
@@ -22,6 +23,9 @@
             </td>
             <td>
                 @item.Created
+            </td>
+            <td>
+                @item.ClicksCount
             </td>
             <td>
                 <form method="post" asp-controller="Url" asp-action="DeleteShortUrl">
