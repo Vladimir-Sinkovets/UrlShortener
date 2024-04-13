@@ -64,6 +64,7 @@ namespace UrlShortener.Controllers
             await _dbContext.SaveChangesAsync();
 
             string host = HttpContext.Request.Host.Value;
+
             viewModel.ShortUrl = $"https://{host}/{uniqueString}";
             viewModel.IsCorrect = true;
 
