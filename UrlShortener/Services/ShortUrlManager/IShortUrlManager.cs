@@ -8,6 +8,7 @@ namespace UrlShortener.Services.ShortUrlManager
         Task DeleteUrlMappingEntryAsync(string id);
         Task<UrlMappingEntry> AddUrlMappingEntryAsync(string originalUrl);
         Task<UrlMappingEntry> GetAndCountUrlMappingEntryAsync(string id);
-        UrlMappingEntry GetUrlMappingEntryAsync(string id);
+        UrlMappingEntry GetUrlMappingEntry(string id);
+        Task UpdateUrlMappingEntryAsync(string id, string newId, string url);
     }
 }

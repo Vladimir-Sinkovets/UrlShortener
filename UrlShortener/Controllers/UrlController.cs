@@ -89,11 +89,12 @@ namespace UrlShortener.Controllers
         {
             try
             {
-                var entry = _shortUrlManager.GetUrlMappingEntryAsync(id);
+                var entry = _shortUrlManager.GetUrlMappingEntry(id);
 
                 var viewModel = new EditViewModel()
                 {
                     Id = entry.Id,
+                    NewId = entry.Id,
                     Url = entry.Url,
                 };
 
@@ -102,6 +103,35 @@ namespace UrlShortener.Controllers
             catch (NotFoundException)
             {
                 return NotFound();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(EditViewModel viewModel)
+        {
+            try
+            {
+                await _shortUrlManager.UpdateUrlMappingEntryAsync(viewModel.Id, viewModel.NewId, viewModel.Url);
+
+                return RedirectToAction("Edit", new { id = viewModel.NewId} );
+            }
+            catch (NotFoundException)
+            {
+                return NotFound();
+            }
+            catch (ArgumentException e)
+            {
+                if (e.ParamName == "url")
+                    viewModel.Message = "Wrong url";
+
+                if (e.ParamName == "newId")
+                    viewModel.Message = "This id has already been used";
+
+                return View(viewModel);
             }
             catch (Exception)
             {

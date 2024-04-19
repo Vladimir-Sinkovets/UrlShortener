@@ -18,7 +18,7 @@ namespace UrlShortener.Services.ShortUrlManager
 
         public async Task<UrlMappingEntry> AddUrlMappingEntryAsync(string originalUrl)
         {
-            if (Uri.IsWellFormedUriString(originalUrl, UriKind.Absolute) == false)
+            if (IsUrlValid(originalUrl) == false)
             {
                 throw new ArgumentException("Wrong url format");
             }
@@ -71,6 +71,42 @@ namespace UrlShortener.Services.ShortUrlManager
             return entry;
         }
 
+        public UrlMappingEntry GetUrlMappingEntry(string id)
+        {
+            var entry = _dbContext.UrlMappingEntries.FirstOrDefault(x => x.Id == id);
+
+            if (entry == null)
+                throw new NotFoundException($"Entry with id = {id} does not exist");
+
+            return entry;
+        }
+
+        public async Task UpdateUrlMappingEntryAsync(string id, string newId, string url)
+        {
+            var entry = GetUrlMappingEntry(id);
+
+            if (id != newId)
+            {
+                var isIdUnique = !_dbContext.UrlMappingEntries.Any(x => x.Id == newId);
+
+                if (isIdUnique == false)
+                    throw new ArgumentException($"Entry with id = {newId} has already been used", nameof(newId));
+            }
+
+            if (IsUrlValid(url) == false)
+                throw new ArgumentException($"Url {url} is not valid", nameof(url));
+
+            entry.Url = url;
+            entry.Id = newId;
+
+            await _dbContext.SaveChangesAsync();
+        }
+
+        private static bool IsUrlValid(string originalUrl)
+        {
+            return Uri.IsWellFormedUriString(originalUrl, UriKind.Absolute);
+        }
+
         private static string GenerateUniqueStringForCollection(IUniqueStringGenerator uniqueStringGenerator,
             IQueryable<UrlMappingEntry> urlMappingEntries)
         {
@@ -86,16 +122,6 @@ namespace UrlShortener.Services.ShortUrlManager
             while (entry != null);
 
             return uniqueString;
-        }
-
-        public UrlMappingEntry GetUrlMappingEntryAsync(string id)
-        {
-            var entry = _dbContext.UrlMappingEntries.FirstOrDefault(x => x.Id == id);
-
-            if (entry == null)
-                throw new NotFoundException($"Entry with id = {id} does not exist");
-
-            return entry;
         }
     }
 }
