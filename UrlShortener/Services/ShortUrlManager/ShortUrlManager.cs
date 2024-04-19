@@ -88,7 +88,7 @@ namespace UrlShortener.Services.ShortUrlManager
             return uniqueString;
         }
 
-        public async Task<UrlMappingEntry> GetUrlMappingEntryAsync(string id)
+        public UrlMappingEntry GetUrlMappingEntryAsync(string id)
         {
             var entry = _dbContext.UrlMappingEntries.FirstOrDefault(x => x.Id == id);
 

@@ -85,11 +85,11 @@ namespace UrlShortener.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Edit(string id)
+        public IActionResult Edit(string id)
         {
             try
             {
-                var entry = await _shortUrlManager.GetUrlMappingEntryAsync(id);
+                var entry = _shortUrlManager.GetUrlMappingEntryAsync(id);
 
                 var viewModel = new EditViewModel()
                 {
