@@ -28,6 +28,9 @@
                 @item.ClicksCount
             </td>
             <td>
+                <a asp-controller="Url" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Edit</a>
+            </td>
+            <td>
                 <form method="post" asp-controller="Url" asp-action="DeleteShortUrl">
                     <input hidden name="id" value="@item.Id" />
                     <input hidden name="redirectUrl" value="@($"https://{Model.Host}/Url/List")"/>

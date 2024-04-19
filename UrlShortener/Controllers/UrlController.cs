@@ -83,5 +83,8 @@ namespace UrlShortener.Controllers
                 throw;
             }
         }
+
+        [HttpGet]
+        public IActionResult Edit(string id) => View();
     }
 }
