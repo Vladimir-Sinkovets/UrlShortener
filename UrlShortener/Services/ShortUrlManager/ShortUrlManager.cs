@@ -87,5 +87,15 @@ namespace UrlShortener.Services.ShortUrlManager
 
             return uniqueString;
         }
+
+        public async Task<UrlMappingEntry> GetUrlMappingEntryAsync(string id)
+        {
+            var entry = _dbContext.UrlMappingEntries.FirstOrDefault(x => x.Id == id);
+
+            if (entry == null)
+                throw new NotFoundException($"Entry with id = {id} does not exist");
+
+            return entry;
+        }
     }
 }

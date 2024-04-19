@@ -1,12 +1,14 @@
-﻿<form>
+﻿@model EditViewModel
+
+<form>
     <div>
-        <label class="sr-only">URL: </label>
-        <input type="text" />
+        <label asp-for="Url" class="sr-only">URL: </label>
+        <input asp-for="Url" type="text" />
     </div>
 
     <div>
-        <label class="sr-only">Short URL: </label>
-        <input type="text" maxlength="12"/>
+        <label asp-for="Id" class="sr-only">Short URL: </label>
+        <input asp-for="Id" type="text" maxlength="12"/>
     </div>
     <div>
         <input class="btn btn-primary" type="submit" value="Save" />
