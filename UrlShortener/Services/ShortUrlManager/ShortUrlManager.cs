@@ -20,17 +20,18 @@ namespace UrlShortener.Services.ShortUrlManager
         {
             if (IsUrlValid(originalUrl) == false)
             {
-                throw new ArgumentException("Wrong url format");
+                throw new ArgumentException("Wrong url format", nameof(originalUrl));
             }
 
-            var uniqueString = GenerateUniqueStringForCollection(_uniqueStringGenerator, _dbContext.UrlMappingEntries);
+            var slug = GenerateUniqueStringForCollection(_uniqueStringGenerator, _dbContext.UrlMappingEntries);
 
             var urlMappingEntry = new UrlMappingEntry()
             {
+                Id = Guid.NewGuid().ToString(),
                 ClicksCount = 0,
                 Created = DateTime.Now,
                 Url = originalUrl,
-                Id = uniqueString,
+                Slug = slug,
             };
 
             _dbContext.UrlMappingEntries.Add(urlMappingEntry);
@@ -57,12 +58,9 @@ namespace UrlShortener.Services.ShortUrlManager
             return _dbContext.UrlMappingEntries;
         }
 
-        public async Task<UrlMappingEntry> GetAndCountUrlMappingEntryAsync(string id)
+        public async Task<UrlMappingEntry> GetAndCountUrlMappingEntryAsync(string slug)
         {
-            var entry = _dbContext.UrlMappingEntries.FirstOrDefault(x => x.Id == id);
-
-            if (entry == null)
-                throw new NotFoundException($"Entry with id = {id} does not exist");
+            var entry = GetUrlMappingEntry(slug);
 
             entry.ClicksCount++;
 
@@ -71,33 +69,36 @@ namespace UrlShortener.Services.ShortUrlManager
             return entry;
         }
 
-        public UrlMappingEntry GetUrlMappingEntry(string id)
+        public UrlMappingEntry GetUrlMappingEntry(string slug)
+        {
+            var entry = _dbContext.UrlMappingEntries.FirstOrDefault(x => x.Slug == slug);
+
+            if (entry == null)
+                throw new NotFoundException($"Entry with slug = {slug} does not exist");
+
+            return entry;
+        }
+
+        public async Task UpdateUrlMappingEntryAsync(string id, string slug, string url)
         {
             var entry = _dbContext.UrlMappingEntries.FirstOrDefault(x => x.Id == id);
 
             if (entry == null)
                 throw new NotFoundException($"Entry with id = {id} does not exist");
 
-            return entry;
-        }
-
-        public async Task UpdateUrlMappingEntryAsync(string id, string newId, string url)
-        {
-            var entry = GetUrlMappingEntry(id);
-
-            if (id != newId)
+            if (entry.Slug != slug)
             {
-                var isIdUnique = !_dbContext.UrlMappingEntries.Any(x => x.Id == newId);
+                var isIdUnique = !_dbContext.UrlMappingEntries.Any(x => x.Slug == slug);
 
                 if (isIdUnique == false)
-                    throw new ArgumentException($"Entry with id = {newId} has already been used", nameof(newId));
+                    throw new ArgumentException($"Entry with slug = {slug} has already been used", nameof(slug));
             }
 
             if (IsUrlValid(url) == false)
                 throw new ArgumentException($"Url {url} is not valid", nameof(url));
 
             entry.Url = url;
-            entry.Id = newId;
+            entry.Slug = slug;
 
             await _dbContext.SaveChangesAsync();
         }

@@ -40,7 +40,7 @@ namespace UrlShortener.Controllers
             {
                 var entry = await _shortUrlManager.AddUrlMappingEntryAsync(viewModel.Url);
 
-                viewModel.ShortUrl = $"https://{Host}/{entry.Id}";
+                viewModel.ShortUrl = $"https://{Host}/{entry.Slug}";
 
                 return View(viewModel);
             }
@@ -65,12 +65,12 @@ namespace UrlShortener.Controllers
         }
         
         [HttpGet]
-        [Route("/{id}")]
-        public async Task<IActionResult> UseShortUrlAsync(string id)
+        [Route("/{slug}")]
+        public async Task<IActionResult> UseShortUrlAsync(string slug)
         {
             try
             {
-                var entry = await _shortUrlManager.GetAndCountUrlMappingEntryAsync(id);
+                var entry = await _shortUrlManager.GetAndCountUrlMappingEntryAsync(slug);
 
                 return Redirect(entry.Url);
             }
@@ -85,16 +85,16 @@ namespace UrlShortener.Controllers
         }
 
         [HttpGet]
-        public IActionResult Edit(string id)
+        public IActionResult Edit(string slug)
         {
             try
             {
-                var entry = _shortUrlManager.GetUrlMappingEntry(id);
+                var entry = _shortUrlManager.GetUrlMappingEntry(slug);
 
                 var viewModel = new EditViewModel()
                 {
                     Id = entry.Id,
-                    NewId = entry.Id,
+                    Slug = entry.Slug,
                     Url = entry.Url,
                 };
 
@@ -115,9 +115,9 @@ namespace UrlShortener.Controllers
         {
             try
             {
-                await _shortUrlManager.UpdateUrlMappingEntryAsync(viewModel.Id, viewModel.NewId, viewModel.Url);
+                await _shortUrlManager.UpdateUrlMappingEntryAsync(viewModel.Id, viewModel.Slug, viewModel.Url);
 
-                return RedirectToAction("Edit", new { id = viewModel.NewId} );
+                return RedirectToAction("Edit", new { slug = viewModel.Slug } );
             }
             catch (NotFoundException)
             {
@@ -128,8 +128,8 @@ namespace UrlShortener.Controllers
                 if (e.ParamName == "url")
                     viewModel.Message = "Wrong url";
 
-                if (e.ParamName == "newId")
-                    viewModel.Message = "This id has already been used";
+                if (e.ParamName == "slug")
+                    viewModel.Message = "This short url has already been used";
 
                 return View(viewModel);
             }
