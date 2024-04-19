@@ -40,7 +40,7 @@ namespace UrlShortener.Controllers
             {
                 var entry = await _shortUrlManager.AddUrlMappingEntryAsync(viewModel.Url);
 
-                viewModel.ShortUrl = $"https://{Host}/{entry.Id}";
+                viewModel.ShortUrl = $"https://{Host}/{entry.Slug}";
 
                 return View(viewModel);
             }
@@ -65,18 +65,73 @@ namespace UrlShortener.Controllers
         }
         
         [HttpGet]
-        [Route("/{id}")]
-        public async Task<IActionResult> UseShortUrlAsync(string id)
+        [Route("/{slug}")]
+        public async Task<IActionResult> UseShortUrlAsync(string slug)
         {
             try
             {
-                var entry = await _shortUrlManager.GetAndCountUrlMappingEntryAsync(id);
+                var entry = await _shortUrlManager.GetAndCountUrlMappingEntryAsync(slug);
 
                 return Redirect(entry.Url);
             }
             catch (NotFoundException)
             {
                 return NotFound();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [HttpGet]
+        public IActionResult Edit(string slug)
+        {
+            try
+            {
+                var entry = _shortUrlManager.GetUrlMappingEntry(slug);
+
+                var viewModel = new EditViewModel()
+                {
+                    Id = entry.Id,
+                    Slug = entry.Slug,
+                    Url = entry.Url,
+                };
+
+                return View(viewModel);
+            }
+            catch (NotFoundException)
+            {
+                return NotFound();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(EditViewModel viewModel)
+        {
+            try
+            {
+                await _shortUrlManager.UpdateUrlMappingEntryAsync(viewModel.Id, viewModel.Slug, viewModel.Url);
+
+                return RedirectToAction("Edit", new { slug = viewModel.Slug } );
+            }
+            catch (NotFoundException)
+            {
+                return NotFound();
+            }
+            catch (ArgumentException e)
+            {
+                if (e.ParamName == "url")
+                    viewModel.Message = "Wrong url";
+
+                if (e.ParamName == "slug")
+                    viewModel.Message = "Wrong slug";
+
+                return View(viewModel);
             }
             catch (Exception)
             {

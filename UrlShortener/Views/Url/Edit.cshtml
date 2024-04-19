@@ -1,0 +1,19 @@
+﻿@model EditViewModel
+
+<form method="post" asp-controller="Url" asp-action="Edit">
+    <input hidden asp-for="Id" value="@Model.Id"/>
+    <p>
+        @Model.Message
+    </p>
+    <div>
+        <label asp-for="Url" class="sr-only">URL: </label>
+        <input asp-for="Url" type="text" />
+    </div>
+    <div>
+        <label asp-for="Slug" class="sr-only">Short URL: </label>
+        <input asp-for="Slug" type="text" maxlength="12"/>
+    </div>
+    <div>
+        <input class="btn btn-primary" type="submit" value="Save" />
+    </div>
+</form>
