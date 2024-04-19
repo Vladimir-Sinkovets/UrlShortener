@@ -129,7 +129,7 @@ namespace UrlShortener.Controllers
                     viewModel.Message = "Wrong url";
 
                 if (e.ParamName == "slug")
-                    viewModel.Message = "This short url has already been used";
+                    viewModel.Message = "Wrong slug";
 
                 return View(viewModel);
             }

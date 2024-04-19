@@ -9,6 +9,7 @@ namespace UrlShortener
     {
         private const string MySqlConnectionSection = "MySql";
         private const string UniqueStringGeneratorSection = "UniqueStringGenerator";
+        private const string ShortUrlManagerSection = "ShortUrlManager";
 
         public static void Main(string[] args)
         {
@@ -26,6 +27,7 @@ namespace UrlShortener
             builder.Services.AddTransient<IShortUrlManager, ShortUrlManager>();
             builder.Services.AddTransient<IUniqueStringGenerator, UniqueStringGenerator>();
             builder.Services.Configure<UniqueStringGeneratorSettings>(builder.Configuration.GetSection(UniqueStringGeneratorSection));
+            builder.Services.Configure<ShortUrlManagerSettings>(builder.Configuration.GetSection(ShortUrlManagerSection));
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
