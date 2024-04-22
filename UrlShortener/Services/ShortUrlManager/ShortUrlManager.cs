@@ -28,7 +28,7 @@ namespace UrlShortener.Services.ShortUrlManager
                 throw new ArgumentException("Wrong url format", nameof(originalUrl));
             }
 
-            var slug = GenerateUniqueStringForCollection(_uniqueStringGenerator, _dbContext.UrlMappingEntries);
+            var slug = GenerateUniqueSlug(_uniqueStringGenerator, _dbContext.UrlMappingEntries);
 
             var urlMappingEntry = new UrlMappingEntry()
             {
@@ -122,7 +122,7 @@ namespace UrlShortener.Services.ShortUrlManager
             return Uri.IsWellFormedUriString(originalUrl, UriKind.Absolute);
         }
 
-        private static string GenerateUniqueStringForCollection(IUniqueStringGenerator uniqueStringGenerator,
+        private static string GenerateUniqueSlug(IUniqueStringGenerator uniqueStringGenerator, 
             IQueryable<UrlMappingEntry> urlMappingEntries)
         {
             var uniqueString = string.Empty;
@@ -132,7 +132,7 @@ namespace UrlShortener.Services.ShortUrlManager
             do
             {
                 uniqueString = uniqueStringGenerator.Generate();
-                entry = urlMappingEntries.FirstOrDefault(x => x.Id == uniqueString);
+                entry = urlMappingEntries.FirstOrDefault(x => x.Slug == uniqueString);
             }
             while (entry != null);
 
